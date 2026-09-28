@@ -1,26 +1,262 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Pure White Dashboard with Charcoal & Gold/Yellow Accents */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    /* Primary Accent: Vibrant Gold & Yellow */
+    --primary: 47.9 95.8% 53.1%;
+    --primary-foreground: 240 10% 4%;
+    
+    /* Secondary & Muted: Slate Charcoal & Soft Greys */
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    
+    /* Accent & Highlights */
+    --accent: 47.9 95.8% 53.1%;
+    --accent-foreground: 240 10% 4%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Subtle Charcoal & Grey Borders */
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 47.9 95.8% 53.1%;
+    --radius: 0.75rem;
+
+    /* Custom Color Tokens (Light & Dark Yellow mix, Greys, Black) */
+    --color-yellow-light: #fef08a;
+    --color-yellow-bright: #facc15;
+    --color-yellow-gold: #eab308;
+    --color-yellow-dark: #ca8a04;
+    --color-yellow-ochre: #a16207;
+    --color-grey-light: #f4f4f5;
+    --color-grey-mid: #71717a;
+    --color-grey-charcoal: #27272a;
+    --color-black-obsidian: #09090b;
+    --color-black-pure: #000000;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #ffffff;
+  color: #09090b;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(234, 179, 8, 0.6);
+}
+
+/* ==========================================================================
+   COLOR COMPONENTS & LUXURY DESIGN SYSTEM (WHITE + GOLD + CHARCOAL)
+   ========================================================================== */
+
+@layer components {
+  /* 1. Gradient Grey Black & Dark Grey Buttons */
+  .btn-gold,
+  .btn-dark-gradient,
+  .btn-charcoal {
+    background: linear-gradient(135deg, #27272a 0%, #18181b 50%, #09090b 100%);
+    color: #ffffff !important;
+    font-weight: 600;
+    border: 1px solid #3f3f46;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-gold:hover,
+  .btn-dark-gradient:hover,
+  .btn-charcoal:hover {
+    background: linear-gradient(135deg, #3f3f46 0%, #27272a 50%, #18181b 100%);
+    border-color: #52525b;
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+  }
+  .btn-gold:active,
+  .btn-dark-gradient:active,
+  .btn-charcoal:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* 2. Gradient Grey Button */
+  .btn-grey-gradient {
+    background: linear-gradient(135deg, #52525b 0%, #3f3f46 50%, #27272a 100%);
+    color: #ffffff !important;
+    font-weight: 600;
+    border: 1px solid #52525b;
+    box-shadow: 0 3px 8px -1px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-grey-gradient:hover {
+    background: linear-gradient(135deg, #71717a 0%, #52525b 50%, #3f3f46 100%);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+  }
+
+  /* 3. Gold & Grey Subtle Button */
+  .btn-gold-subtle {
+    background: #f4f4f5;
+    color: #09090b;
+    font-weight: 600;
+    border: 1px solid #d4d4d8;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-gold-subtle:hover {
+    background: #e4e4e7;
+    border-color: #a1a1aa;
+    color: #000000;
+    transform: translateY(-1px);
+  }
+
+  /* 4. Gold & Light/Dark Yellow Badges */
+  .badge-gold {
+    background: rgba(254, 240, 138, 0.4);
+    color: #854d0e;
+    border: 1px solid rgba(234, 179, 8, 0.45);
+    box-shadow: 0 1px 4px rgba(234, 179, 8, 0.1);
+    font-weight: 600;
+  }
+
+  .badge-gold-dark {
+    background: rgba(245, 158, 11, 0.18);
+    color: #78350f;
+    border: 1px solid rgba(217, 119, 6, 0.4);
+    font-weight: 600;
+  }
+
+  /* 5. Metallic Grey Badge */
+  .badge-grey {
+    background: #f4f4f5;
+    color: #3f3f46;
+    border: 1px solid #e4e4e7;
+    font-weight: 500;
+  }
+
+  /* 6. Dashboard Cards */
+  .card-obsidian {
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    color: #09090b;
+  }
+
+  .card-gold-glow {
+    background: linear-gradient(145deg, rgba(254, 240, 138, 0.15) 0%, #ffffff 60%);
+    border: 1px solid rgba(234, 179, 8, 0.35);
+    box-shadow: 0 4px 20px -2px rgba(234, 179, 8, 0.12);
+    color: #09090b;
+  }
+
+  /* 7. Typography Gradients */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #ca8a04 0%, #eab308 40%, #a16207 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-grey-gradient {
+    background: linear-gradient(135deg, #18181b 0%, #3f3f46 60%, #71717a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 8. Glowing Borders & Shadows */
+  .glow-gold {
+    box-shadow: 0 0 20px -3px rgba(234, 179, 8, 0.25);
+  }
+  .glow-gold-sm {
+    box-shadow: 0 0 10px -2px rgba(234, 179, 8, 0.2);
+  }
+  .border-gold-subtle {
+    border-color: rgba(234, 179, 8, 0.3);
+  }
+}
+
+/* Glassmorphism & Micro-borders */
+.glass-panel {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.glass-panel-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  background: #ffffff;
+  border-color: rgba(234, 179, 8, 0.45);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 0 15px -3px rgba(234, 179, 8, 0.15);
+}
+
+/* Skeleton Shimmer Gradient (Charcoal & Gold hue) */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(24, 24, 27, 0.5) 0%,
+    rgba(39, 39, 42, 0.8) 50%,
+    rgba(24, 24, 27, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+/* Pulse animation for live indicators */
+@keyframes radar-ping {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+.radar-dot {
+  position: relative;
+}
+.radar-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  background: inherit;
+  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

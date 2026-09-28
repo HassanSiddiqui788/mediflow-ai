@@ -1,0 +1,122 @@
+// use prisma-8
+
+model Patient {
+  id                    Int      @id @default(autoincrement())
+  patientCode           String   @unique
+  mrn                   String   @unique
+  firstName             String
+  lastName              String
+  dateOfBirth           String
+  gender                String
+  bloodGroup            String
+  phone                 String
+  email                 String
+  address               String
+  emergencyContactName  String?
+  emergencyContactRel   String?
+  emergencyContactPhone String?
+  department            String
+  attendingDoctor       String
+  status                String
+  bedNumber             String?
+  admissionDate         String?
+  lastVisit             String?
+  allergies             String?
+  insuranceProvider     String?
+  policyNumber          String?
+  vitalsBp              String?
+  vitalsHeartRate       Int?
+  vitalsSpo2            Int?
+  vitalsTemp            Float?
+  vitalsRespRate        Int?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now())
+}
+
+model Appointment {
+  id             Int      @id @default(autoincrement())
+  appointmentCode String  @unique
+  patientId      Int
+  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor         String
+  doctorId       String?
+  department     String
+  date           String
+  time           String
+  duration       Int      @default(30)
+  type           String
+  status         String
+  room           String
+  reasonForVisit String
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+}
+
+model Bed {
+  id              Int      @id @default(autoincrement())
+  bedCode         String   @unique
+  bedNumber       String   @unique
+  ward            String
+  room            String
+  floor           Int
+  status          String
+  equipment       String?
+  patientId       Int?
+  patient         Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  nurseInCharge   String?
+  lastCleaned     String?
+  reservedFor     String?
+  maintenanceNote String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+}
+
+model EmergencyCase {
+  id                 Int      @id @default(autoincrement())
+  caseCode           String   @unique
+  patientId          Int?
+  patient            Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  patientName        String
+  patientAge         Int
+  patientGender      String
+  arrivalTime        DateTime @default(now())
+  waitingTimeMinutes Int      @default(0)
+  priority           String
+  esiScore           Int
+  chiefComplaint     String
+  vitalsBp           String?
+  vitalsPulse        Int?
+  vitalsSpo2         Int?
+  vitalsTemp         Float?
+  assignedDoctor     String
+  assignedNurse      String?
+  room               String
+  status             String
+  notes              String?
+  flags              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+}
+
+model LabTest {
+  id                      Int      @id @default(autoincrement())
+  testCode                String   @unique
+  patientId               Int
+  patient                 Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  testName                String
+  category                String
+  sampleType              String
+  doctor                  String
+  department              String
+  requestedTime           DateTime @default(now())
+  estimatedCompletionTime String?
+  priority                String
+  status                  String
+  resultSummary           String?
+  flaggedAbnormal         Boolean  @default(false)
+  referenceRange          String?
+  technician              String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @default(now())
+}
