@@ -9,14 +9,17 @@ import { apiSuccess, handleApiError } from '@/lib/api-response';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const timeRange = searchParams.get('timeRange') || 'Today';
+
     const [metricsOverview, departmentStatuses, hourlyVolume, bedOccupancyTrends, departmentWorkload] =
       await Promise.all([
-        getDbMetricOverview(),
+        getDbMetricOverview(timeRange),
         getDbDepartmentStatuses(),
-        getDbHourlyVolume(),
-        getDbBedOccupancyTrends(),
+        getDbHourlyVolume(timeRange),
+        getDbBedOccupancyTrends(timeRange),
         getDbDepartmentWorkload(),
       ]);
 

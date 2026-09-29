@@ -22,6 +22,7 @@ import {
 import { HOSPITAL_DEPARTMENTS } from '@/lib/constants';
 import { getStatusBadgeStyles } from '@/lib/utils';
 import { Appointment } from '@/types/appointment';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface AppointmentsViewProps {
   initialAppointments?: Appointment[];
@@ -147,6 +148,20 @@ export function AppointmentsView({ initialAppointments = [] }: AppointmentsViewP
     };
   }, [appointments]);
 
+  const departmentOptions = [
+    { value: 'All', label: 'All Departments' },
+    ...HOSPITAL_DEPARTMENTS.map((dept) => ({ value: dept, label: dept })),
+  ];
+
+  const statusOptions = [
+    { value: 'All', label: 'All Statuses' },
+    { value: 'Scheduled', label: 'Scheduled' },
+    { value: 'Checked In', label: 'Checked In' },
+    { value: 'In Progress', label: 'In Progress' },
+    { value: 'Completed', label: 'Completed' },
+    { value: 'Cancelled', label: 'Cancelled' },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Top Metric Cards */}
@@ -187,31 +202,19 @@ export function AppointmentsView({ initialAppointments = [] }: AppointmentsViewP
             />
           </div>
 
-          <select
+          <Dropdown
             value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="h-9 px-3 rounded-lg border border-zinc-300 bg-white text-xs text-black font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-500 shadow-xs cursor-pointer"
-          >
-            <option value="All">All Departments</option>
-            {HOSPITAL_DEPARTMENTS.map((dept) => (
-              <option key={dept} value={dept}>
-                {dept}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setSelectedDept(val)}
+            options={departmentOptions}
+            className="w-full sm:w-auto"
+          />
 
-          <select
+          <Dropdown
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="h-9 px-3 rounded-lg border border-zinc-300 bg-white text-xs text-black font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-500 shadow-xs cursor-pointer"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Scheduled">Scheduled</option>
-            <option value="Checked In">Checked In</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
+            onChange={(val) => setSelectedStatus(val)}
+            options={statusOptions}
+            className="w-full sm:w-auto"
+          />
         </div>
 
         {/* View mode toggle & Actions */}

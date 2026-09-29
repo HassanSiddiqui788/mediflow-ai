@@ -26,6 +26,7 @@ import { HOSPITAL_DEPARTMENTS } from '@/lib/constants';
 import { formatDate, getStatusBadgeStyles } from '@/lib/utils';
 import { Patient } from '@/types/patient';
 import { AdmitPatientDialog } from './AdmitPatientDialog';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface PatientTableProps {
   initialPatients?: Patient[];
@@ -109,6 +110,20 @@ export function PatientTable({ initialPatients = [], isLoading = false }: Patien
     fetchPatients();
   };
 
+  const departmentOptions = [
+    { value: 'All', label: 'All Departments' },
+    ...HOSPITAL_DEPARTMENTS.map((dept) => ({ value: dept, label: dept })),
+  ];
+
+  const statusOptions = [
+    { value: 'All', label: 'All Statuses' },
+    { value: 'Inpatient', label: 'Inpatient' },
+    { value: 'Outpatient', label: 'Outpatient' },
+    { value: 'Active', label: 'Active' },
+    { value: 'Critical', label: 'Critical' },
+    { value: 'Discharged', label: 'Discharged' },
+  ];
+
   return (
     <div className="space-y-4">
       {/* Top Action Buttons & Search Toolbar */}
@@ -129,39 +144,27 @@ export function PatientTable({ initialPatients = [], isLoading = false }: Patien
             />
           </div>
 
-          {/* Department Filter */}
-          <select
+          {/* Department Dropdown Filter */}
+          <Dropdown
             value={selectedDept}
-            onChange={(e) => {
-              setSelectedDept(e.target.value);
+            onChange={(val) => {
+              setSelectedDept(val);
               setCurrentPage(1);
             }}
-            className="h-9 px-3 rounded-lg border border-zinc-300 bg-white text-xs text-black font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-500 shadow-xs cursor-pointer"
-          >
-            <option value="All">All Departments</option>
-            {HOSPITAL_DEPARTMENTS.map((dept) => (
-              <option key={dept} value={dept}>
-                {dept}
-              </option>
-            ))}
-          </select>
+            options={departmentOptions}
+            className="w-full sm:w-auto"
+          />
 
-          {/* Status Filter */}
-          <select
+          {/* Status Dropdown Filter */}
+          <Dropdown
             value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
+            onChange={(val) => {
+              setSelectedStatus(val);
               setCurrentPage(1);
             }}
-            className="h-9 px-3 rounded-lg border border-zinc-300 bg-white text-xs text-black font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-500 shadow-xs cursor-pointer"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Inpatient">Inpatient</option>
-            <option value="Outpatient">Outpatient</option>
-            <option value="Active">Active</option>
-            <option value="Critical">Critical</option>
-            <option value="Discharged">Discharged</option>
-          </select>
+            options={statusOptions}
+            className="w-full sm:w-auto"
+          />
         </div>
 
         {/* Action Controls */}

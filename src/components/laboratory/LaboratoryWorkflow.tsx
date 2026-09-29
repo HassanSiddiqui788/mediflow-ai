@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { LabTest } from '@/types/laboratory';
 import { getStatusBadgeStyles } from '@/lib/utils';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface LaboratoryWorkflowProps {
   initialTests?: LabTest[];
@@ -90,6 +91,23 @@ export function LaboratoryWorkflow({ initialTests = [] }: LaboratoryWorkflowProp
     return { total, stat, inProgress, completed, abnormal };
   }, [tests]);
 
+  const categoryOptions = [
+    { value: 'All', label: 'All Categories' },
+    { value: 'Hematology', label: 'Hematology' },
+    { value: 'Biochemistry', label: 'Biochemistry' },
+    { value: 'Microbiology', label: 'Microbiology' },
+    { value: 'Pathology', label: 'Pathology' },
+    { value: 'Immunology', label: 'Immunology' },
+  ];
+
+  const statusOptions = [
+    { value: 'All', label: 'All Statuses' },
+    { value: 'Pending', label: 'Pending' },
+    { value: 'In Progress', label: 'In Progress' },
+    { value: 'Completed', label: 'Completed' },
+    { value: 'Reviewed', label: 'Reviewed' },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Top Laboratory KPIs */}
@@ -130,30 +148,19 @@ export function LaboratoryWorkflow({ initialTests = [] }: LaboratoryWorkflowProp
             />
           </div>
 
-          <select
+          <Dropdown
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="h-9 px-3 rounded-lg border border-zinc-300 bg-white text-xs text-black font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-500 shadow-xs cursor-pointer"
-          >
-            <option value="All">All Categories</option>
-            <option value="Hematology">Hematology</option>
-            <option value="Biochemistry">Biochemistry</option>
-            <option value="Microbiology">Microbiology</option>
-            <option value="Pathology">Pathology</option>
-            <option value="Immunology">Immunology</option>
-          </select>
+            onChange={(val) => setSelectedCategory(val)}
+            options={categoryOptions}
+            className="w-full sm:w-auto"
+          />
 
-          <select
+          <Dropdown
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="h-9 px-3 rounded-lg border border-zinc-300 bg-white text-xs text-black font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-500 shadow-xs cursor-pointer"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-            <option value="Reviewed">Reviewed</option>
-          </select>
+            onChange={(val) => setSelectedStatus(val)}
+            options={statusOptions}
+            className="w-full sm:w-auto"
+          />
         </div>
 
         <Button
