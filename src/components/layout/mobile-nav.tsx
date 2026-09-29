@@ -78,6 +78,7 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   onClick={() => onOpenChange(false)}
                   className={cn(
                     'flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors',

@@ -29,7 +29,7 @@ interface AppointmentsViewProps {
 
 export function AppointmentsView({ initialAppointments = [] }: AppointmentsViewProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initialAppointments.length === 0);
   const [search, setSearch] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('All');
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
@@ -52,10 +52,10 @@ export function AppointmentsView({ initialAppointments = [] }: AppointmentsViewP
   const [bookLoading, setBookLoading] = useState(false);
   const [bookError, setBookError] = useState<string | null>(null);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/appointments/list');
+      const res = await fetch('/api/appointments/list', { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setAppointments(json.data);
@@ -67,7 +67,29 @@ export function AppointmentsView({ initialAppointments = [] }: AppointmentsViewP
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch('/api/appointments/list', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          if (json.success && json.data) {
+            setAppointments(json.data);
+          } else if (Array.isArray(json.data)) {
+            setAppointments(json.data);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load appointments:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleBookSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,8 +108,9 @@ export function AppointmentsView({ initialAppointments = [] }: AppointmentsViewP
         throw new Error(json.error?.message || json.error || 'Failed to book appointment');
       }
 
-      setAppointments((prev) => [json.data, ...prev]);
+      setAppointments((prev) => [json.data, ...prev.filter((a) => a.id !== json.data.id)]);
       setIsBookOpen(false);
+      fetchAppointments();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error booking appointment';
       setBookError(msg);

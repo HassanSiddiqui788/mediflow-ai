@@ -30,7 +30,7 @@ interface EmergencyTriageCenterProps {
 
 export function EmergencyTriageCenter({ initialCases = [] }: EmergencyTriageCenterProps) {
   const [cases, setCases] = useState<EmergencyPatient[]>(initialCases);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initialCases.length === 0);
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -47,10 +47,10 @@ export function EmergencyTriageCenter({ initialCases = [] }: EmergencyTriageCent
   });
   const [addLoading, setAddLoading] = useState(false);
 
-  const fetchCases = async () => {
+  const fetchCases = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/emergency/list');
+      const res = await fetch('/api/emergency/list', { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setCases(json.data);
@@ -62,7 +62,29 @@ export function EmergencyTriageCenter({ initialCases = [] }: EmergencyTriageCent
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch('/api/emergency/list', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          if (json.success && json.data) {
+            setCases(json.data);
+          } else if (Array.isArray(json.data)) {
+            setCases(json.data);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load emergency cases:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +97,7 @@ export function EmergencyTriageCenter({ initialCases = [] }: EmergencyTriageCent
       });
       const json = await res.json();
       if (json.success && json.data) {
-        setCases((prev) => [json.data, ...prev]);
+        setCases((prev) => [json.data, ...prev.filter((c) => c.id !== json.data.id)]);
         setIsAddOpen(false);
         setFormData({
           name: '',
@@ -87,6 +109,7 @@ export function EmergencyTriageCenter({ initialCases = [] }: EmergencyTriageCent
           room: 'Bay 03',
           assignedDoctor: 'Dr. Sarah Jenkins, MD',
         });
+        fetchCases();
       }
     } catch (err) {
       console.error('Error adding emergency case:', err);

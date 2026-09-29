@@ -21,15 +21,15 @@ interface LaboratoryWorkflowProps {
 
 export function LaboratoryWorkflow({ initialTests = [] }: LaboratoryWorkflowProps) {
   const [tests, setTests] = useState<LabTest[]>(initialTests);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initialTests.length === 0);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
 
-  const fetchTests = async () => {
+  const fetchTests = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/laboratory/list');
+      const res = await fetch('/api/laboratory/list', { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setTests(json.data);
@@ -41,7 +41,29 @@ export function LaboratoryWorkflow({ initialTests = [] }: LaboratoryWorkflowProp
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch('/api/laboratory/list', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          if (json.success && json.data) {
+            setTests(json.data);
+          } else if (Array.isArray(json.data)) {
+            setTests(json.data);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load laboratory tests:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const filteredTests = useMemo(() => {
     return tests.filter((t) => {

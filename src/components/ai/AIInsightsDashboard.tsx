@@ -44,16 +44,16 @@ function getNextMessageId(prefix: string) {
 
 export function AIInsightsDashboard({ initialInsights }: AIInsightsDashboardProps) {
   const [insights, setInsights] = useState<OperationalInsight[]>(initialInsights || []);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!initialInsights || initialInsights.length === 0);
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [inputQuery, setInputQuery] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [executedActions, setExecutedActions] = useState<Record<string, boolean>>({});
 
-  const fetchInsights = async () => {
+  const fetchInsights = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/ai/insights');
+      const res = await fetch('/api/ai/insights', { cache: 'no-store' });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setInsights(json.data);
@@ -65,7 +65,29 @@ export function AIInsightsDashboard({ initialInsights }: AIInsightsDashboardProp
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch('/api/ai/insights', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          if (json.success && Array.isArray(json.data)) {
+            setInsights(json.data);
+          } else if (json.insights) {
+            setInsights(json.insights);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load AI insights:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || inputQuery;

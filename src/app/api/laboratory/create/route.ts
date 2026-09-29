@@ -14,12 +14,13 @@ export async function POST(req: NextRequest) {
     const doctor = typeof body?.doctor === 'string' ? body.doctor.trim() : 'Attending Physician';
     const department = typeof body?.department === 'string' ? body.department.trim() : 'General Medicine';
     const priority = body?.priority || 'Routine';
-    const patientId = body?.patientId ? Number(body.patientId) : 1;
+    const rawPatientId = body?.patientId;
+    const patientId = rawPatientId !== undefined && rawPatientId !== '' ? rawPatientId : 1;
 
     if (!testName || testName.length < 2) {
       return apiError('Field "testName" is required', 'VALIDATION_ERROR', 422);
     }
-    if (!patientId) {
+    if (patientId === undefined || patientId === null || patientId === '') {
       return apiError('Field "patientId" is required', 'VALIDATION_ERROR', 422);
     }
 

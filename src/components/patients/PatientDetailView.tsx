@@ -22,8 +22,40 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Patient } from '@/types/patient';
 import { getStatusBadgeStyles } from '@/lib/utils';
 
-export function PatientDetailView({ patient }: { patient: Patient }) {
+export function PatientDetailView({ patient: initialPatient }: { patient: Patient }) {
+  const [patient, setPatient] = useState<Patient>(initialPatient);
   const [activeTab, setActiveTab] = useState('overview');
+
+  const fetchPatient = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/patients/get?id=${encodeURIComponent(initialPatient.id)}`, { cache: 'no-store' });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setPatient(json.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch patient details:', err);
+    }
+  }, [initialPatient.id]);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch(`/api/patients/get?id=${encodeURIComponent(initialPatient.id)}`, { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore && json.success && json.data) {
+          setPatient(json.data);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch patient details:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [initialPatient.id]);
+
   const statusStyle = getStatusBadgeStyles(patient.status);
 
   return (
@@ -37,6 +69,15 @@ export function PatientDetailView({ patient }: { patient: Patient }) {
           </Button>
         </Link>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchPatient}
+            className="text-xs border-zinc-300 bg-white text-black font-bold hover:bg-zinc-100 shadow-xs"
+            title="Refresh record from PostgreSQL"
+          >
+            Refresh
+          </Button>
           <Badge variant={patient.status === 'Critical' ? 'rose' : 'gold'} dot dotPulse>
             {patient.status}
           </Badge>

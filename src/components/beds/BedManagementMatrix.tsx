@@ -25,16 +25,16 @@ interface BedManagementMatrixProps {
 
 export function BedManagementMatrix({ initialBeds = [] }: BedManagementMatrixProps) {
   const [beds, setBeds] = useState<Bed[]>(initialBeds);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initialBeds.length === 0);
   const [selectedWard, setSelectedWard] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [activeBedDetail, setActiveBedDetail] = useState<Bed | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
 
-  const fetchBeds = async () => {
+  const fetchBeds = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/beds/list');
+      const res = await fetch('/api/beds/list', { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setBeds(json.data);
@@ -46,7 +46,29 @@ export function BedManagementMatrix({ initialBeds = [] }: BedManagementMatrixPro
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch('/api/beds/list', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          if (json.success && json.data) {
+            setBeds(json.data);
+          } else if (Array.isArray(json.data)) {
+            setBeds(json.data);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load beds:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleUpdateStatus = async (bedId: string, newStatus: BedStatus) => {
     try {
@@ -63,6 +85,7 @@ export function BedManagementMatrix({ initialBeds = [] }: BedManagementMatrixPro
       if (json.success && json.data) {
         setBeds((prev) => prev.map((b) => (b.id === bedId ? json.data : b)));
         setActiveBedDetail(json.data);
+        fetchBeds();
       }
     } catch (err) {
       console.error('Error updating bed status:', err);

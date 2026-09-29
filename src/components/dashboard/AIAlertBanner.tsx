@@ -16,15 +16,21 @@ export function AIAlertBanner({ initialInsights }: AIAlertBannerProps) {
   const [insights, setInsights] = useState<OperationalInsight[]>(initialInsights || []);
 
   React.useEffect(() => {
-    if (!initialInsights) {
-      fetch('/api/ai/insights')
+    let ignore = false;
+    if (!initialInsights || initialInsights.length === 0) {
+      fetch('/api/ai/insights', { cache: 'no-store' })
         .then((res) => res.json())
         .then((data) => {
-          if (data.success && Array.isArray(data.data)) setInsights(data.data);
-          else if (data.insights) setInsights(data.insights);
+          if (!ignore) {
+            if (data.success && Array.isArray(data.data)) setInsights(data.data);
+            else if (data.insights) setInsights(data.insights);
+          }
         })
         .catch(console.error);
     }
+    return () => {
+      ignore = true;
+    };
   }, [initialInsights]);
 
   const primaryAlert = insights[0];

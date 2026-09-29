@@ -25,7 +25,9 @@ export function apiSuccess<T>(data: T, options?: ApiResponseOptions) {
     body.pagination = options.pagination;
   }
 
-  return NextResponse.json(body, { status });
+  const response = NextResponse.json(body, { status });
+  response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+  return response;
 }
 
 export function apiError(
@@ -33,7 +35,7 @@ export function apiError(
   code: string = 'INTERNAL_ERROR',
   status: number = 500
 ) {
-  return NextResponse.json(
+  const response = NextResponse.json(
     {
       success: false,
       error: {
@@ -43,6 +45,8 @@ export function apiError(
     },
     { status }
   );
+  response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+  return response;
 }
 
 export function handleApiError(
@@ -55,3 +59,4 @@ export function handleApiError(
   const message = error instanceof Error ? error.message : defaultMessage;
   return apiError(message, defaultCode, status);
 }
+

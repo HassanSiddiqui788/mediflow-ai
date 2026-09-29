@@ -42,22 +42,44 @@ export function PatientTable({ initialPatients = [], isLoading = false }: Patien
   const [isAdmitOpen, setIsAdmitOpen] = useState(false);
   const itemsPerPage = 8;
 
-  const fetchPatients = async () => {
+  const fetchPatients = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/patients/list');
+      const res = await fetch('/api/patients/list', { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setPatients(json.data);
       } else if (Array.isArray(json.data)) {
         setPatients(json.data);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to refresh patients:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch('/api/patients/list', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          if (json.success && json.data) {
+            setPatients(json.data);
+          } else if (Array.isArray(json.data)) {
+            setPatients(json.data);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load patients:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   // Filtered patients
   const filteredPatients = useMemo(() => {
@@ -83,7 +105,8 @@ export function PatientTable({ initialPatients = [], isLoading = false }: Patien
   }, [filteredPatients, currentPage, itemsPerPage]);
 
   const handlePatientCreated = (newPatient: Patient) => {
-    setPatients((prev) => [newPatient, ...prev]);
+    setPatients((prev) => [newPatient, ...prev.filter((p) => p.id !== newPatient.id)]);
+    fetchPatients();
   };
 
   return (

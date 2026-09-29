@@ -34,13 +34,13 @@ interface OperationsAnalyticsDashboardProps {
 
 export function OperationsAnalyticsDashboard({ initialData }: OperationsAnalyticsDashboardProps) {
   const [data, setData] = useState<AnalyticsData | undefined>(initialData);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!initialData);
   const [timeRange, setTimeRange] = useState<'today' | '7d' | '30d'>('today');
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/analytics/get');
+      const res = await fetch('/api/analytics/get', { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setData(json.data);
@@ -52,7 +52,29 @@ export function OperationsAnalyticsDashboard({ initialData }: OperationsAnalytic
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    let ignore = false;
+    fetch('/api/analytics/get', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          if (json.success && json.data) {
+            setData(json.data);
+          } else if (json.metricsOverview) {
+            setData(json);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load analytics:', err);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const metrics = data?.metricsOverview;
   const hourlyVolume = data?.hourlyVolume || [];
